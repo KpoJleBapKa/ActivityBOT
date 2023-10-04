@@ -8,11 +8,23 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# Словник для збереження ID каналу та ID серверу для кожного серверу
+channel_ids = {}
+
+# Функція для збереження ID каналу для конкретного серверу
+def save_channel_id(guild_id, channel_id):
+    channel_ids[guild_id] = channel_id
+
 @bot.event
 async def on_ready():
     print(f'Бот {bot.user.name} підключився до Discord!')
     update_status.start()
     update_roles.start()
+
+@bot.event
+async def on_guild_join(guild):
+    # Збережіть ID серверу після додавання бота
+    save_channel_id(guild.id, None)
 
 @tasks.loop(seconds=10)
 async def update_status():
@@ -65,40 +77,35 @@ async def update_status():
 
 @tasks.loop(seconds=10)
 async def update_roles():
-    guild_id = 1141311464985083975  # Замініть на ID вашого серверу
-    guild = bot.get_guild(guild_id)
+    for guild_id in channel_ids.keys():
+        guild = bot.get_guild(guild_id)
     
-    for member in guild.members:
-        # Збережіть існуючі ролі учасника, які були видані до цього ботом
-        bot_roles = [role.name for role in member.roles if role.name.startswith("Online ")]
+        for member in guild.members:
+            # Збережіть існуючі ролі учасника, які були видані до цього ботом
+            bot_roles = [role.name for role in member.roles if role.name.startswith("Online ")]
         
-        playing_activities = [activity.name for activity in member.activities if activity.type == discord.ActivityType.playing]
+            playing_activities = [activity.name for activity in member.activities if activity.type == discord.ActivityType.playing]
         
-        for activity_name in playing_activities:
-            role_name = f"Online {activity_name}"
-            if role_name not in bot_roles:
-                # Якщо роль не видається ботом, видайте її
-                role = discord.utils.get(guild.roles, name=role_name)
-                if role is None:
-                    # Якщо роль не існує, створіть її та задайте колір
-                    await guild.create_role(name=role_name, color=discord.Color.green())
+            for activity_name in playing_activities:
+                role_name = f"Online {activity_name}"
+                if role_name not in bot_roles:
+                    # Якщо роль не видається ботом, видайте її
                     role = discord.utils.get(guild.roles, name=role_name)
-                if role:
-                    await member.add_roles(role)
+                    if role is None:
+                        # Якщо роль не існує, створіть її та задайте колір
+                        await guild.create_role(name=role_name, color=discord.Color.green())
+                        role = discord.utils.get(guild.roles, name=role_name)
+                    if role:
+                        await member.add_roles(role)
         
-        # Видаліть ролі, які не відповідають активностям учасника
-        for role in member.roles:
-            if role.name.startswith("Online ") and role.name not in [f"Online {activity}" for activity in playing_activities]:
-                await member.remove_roles(role)
+            # Видаліть ролі, які не відповідають активностям учасника
+            for role in member.roles:
+                if role.name.startswith("Online ") and role.name not in [f"Online {activity}" for activity in playing_activities]:
+                    await member.remove_roles(role)
+
 
 # Запуск бота
 bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
-
-
-
-
-
-
 
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
 # YOUR_TOKEN
