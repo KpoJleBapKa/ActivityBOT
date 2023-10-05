@@ -153,15 +153,8 @@ async def update_roles():
                 if role.name.startswith("Online ") and role.name not in [f"Online {activity}" for activity in playing_activities]:
                     await member.remove_roles(role)
 
-# Змінено для обробки завершення роботи програми
-async def on_shutdown():
-    await bot.close()
-
 # Запуск бота
-if __name__ == "__main__":
-    bot.add_listener(on_shutdown, "on_shutdown")
-    bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
-
+bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
 
 
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
