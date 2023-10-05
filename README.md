@@ -31,6 +31,6 @@ Yes, it is! Use it to your satisfaction!
 8. How do I get updates and upgrades for the bot?
 The bot is automatically updated with new versions. Just monitor this repository and commits.
 
-#Contacts:
-##Telegram: @kpojiebapka
-##Discord: kpojiebapka
+# Contacts:
+## Telegram: @kpojiebapka
+## Discord: kpojiebapka
