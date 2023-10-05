@@ -105,7 +105,7 @@ async def update_roles():
 
 
 # Запуск бота
-bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
+bot.run('YOUR_TOKEN')  # Замініть на свій токен ботаd
 
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
 # YOUR_TOKEN
