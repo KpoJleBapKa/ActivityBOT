@@ -11,8 +11,9 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Створіть список для зберігання даних про сервери та канали
 server_data = [
-    {'server_id': 748275815992656223, 'channel_id': 1159441002935889930},  # Налаштування для першого серверу
-    {'server_id': 1141311464985083975, 'channel_id': 1158891013931278416},  # Налаштування для другого серверу
+    {'server_id': 748275815992656223, 'channel_id': 1159441002935889930},  
+    {'server_id': 1141311464985083975, 'channel_id': 1158891013931278416},  
+    {'server_id': 1159287478629445643, 'channel_id': 1160166893735387206}, # проблемний сервер
     # Додайте налаштування для інших серверів тут
 ]
 
@@ -32,31 +33,37 @@ async def on_ready():
     update_status.start()
     update_roles.start()
 
-@tasks.loop(seconds=30)
+@tasks.loop(minutes=1)
 async def update_status():
     for data in server_data:
         server_id = data['server_id']
         channel_id = data['channel_id']
         channel = bot.get_channel(channel_id)
-        
+
         if channel:
             guild = bot.get_guild(server_id)
-            
+
             online_members = []
             idle_members = []
             dnd_members = []
             offline_members = []
-            
+
+            # Використовуйте fetch_members для отримання інформації про всіх користувачів на сервері
+            await guild.chunk()
+
             for member in guild.members:
                 if member.status == discord.Status.online:
                     if any(activity.type == discord.ActivityType.playing for activity in member.activities):
-                        playing_activities = [activity.name for activity in member.activities if activity.type == discord.ActivityType.playing]
-                        online_members.append(f'**{member.name}** - **online** - грає у **{" / ".join(playing_activities)}**')
+                        playing_activities = [activity.name for activity in member.activities if
+                                              activity.type == discord.ActivityType.playing]
+                        online_members.append(
+                            f'**{member.name}** - **online** - грає у **{" / ".join(playing_activities)}**')
                     else:
                         online_members.append(f'**{member.name}** - **online** - не грає у жодну гру')
                 elif member.status == discord.Status.idle:
                     if any(activity.type == discord.ActivityType.playing for activity in member.activities):
-                        playing_activities = [activity.name for activity in member.activities if activity.type == discord.ActivityType.playing]
+                        playing_activities = [activity.name for activity in member.activities if
+                                              activity.type == discord.ActivityType.playing]
                         idle_members.append(f'**{member.name}** - **idle** - грає у **{" / ".join(playing_activities)}**')
                     else:
                         idle_members.append(f'**{member.name}** - **idle** - не грає у жодну гру')
@@ -64,11 +71,13 @@ async def update_status():
                     offline_members.append(f'**{member.name}** - **offline**')
                 elif member.status == discord.Status.dnd:
                     if any(activity.type == discord.ActivityType.playing for activity in member.activities):
-                        playing_activities = [activity.name for activity in member.activities if activity.type == discord.ActivityType.playing]
-                        dnd_members.append(f'**{member.name}** - **don\'t disturb** - грає у **{" / ".join(playing_activities)}**')
+                        playing_activities = [activity.name for activity in member.activities if
+                                              activity.type == discord.ActivityType.playing]
+                        dnd_members.append(
+                            f'**{member.name}** - **don\'t disturb** - грає у **{" / ".join(playing_activities)}**')
                     else:
                         dnd_members.append(f'**{member.name}** - **don\'t disturb** - не грає у жодну гру')
-            
+
             # Створіть повідомлення для кожного з розділів
             online_message = '|----------- ONLINE -----------|\n' + '\n'.join(online_members)
             idle_message = '|----------- IDLE -----------|\n' + '\n'.join(idle_members)
@@ -124,7 +133,7 @@ def split_message(message):
     
     return messages
 
-@tasks.loop(seconds=30)
+@tasks.loop(minutes=1)
 async def update_roles():
     for data in server_data:
         server_id = data['server_id']
@@ -155,8 +164,6 @@ async def update_roles():
 
 # Запуск бота
 bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
-
-
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
 # YOUR_TOKEN
 # id каналу - 1158891013931278416 
