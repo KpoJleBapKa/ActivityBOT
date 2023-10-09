@@ -4,16 +4,89 @@ import datetime
 import asyncio
 
 intents = discord.Intents.default()
+intents.message_content = True
 intents.presences = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='&', intents=intents)
+
+POST_ID = 1160695186884665374
+
+ROLES = {
+    '♀️': 1160695452782575656,
+    '♂️': 1160695315368788089,
+    '🎮': 1160695682181636126,
+    '⛏️': 1160695772153643169,
+    '🔫': 1160695841833631824,
+    '♿': 1160695846342512781,
+    '🍺': 1160695979658448978,
+    '🚗': 1160696027645497375,
+}
+
+@bot.event
+async def on_ready():
+    print(f'Бот {bot.user.name} підключився до Discord!')
+
+    # Отримайте повідомлення за його ідентифікатором
+    channel_id = 1160691803767455754  # Замініть на ідентифікатор вашого каналу
+    channel = bot.get_channel(channel_id)
+    message = await channel.fetch_message(POST_ID)
+
+    # Пройдіться по реакціях на повідомленні і видайте відповідні ролі
+    for reaction in message.reactions:
+        if reaction.emoji in ROLES:
+            role_id = ROLES[reaction.emoji]
+            role = discord.utils.get(message.guild.roles, id=role_id)
+            if role is not None:
+                users = await reaction.users().flatten()
+                for user in users:
+                    member = message.guild.get_member(user.id)
+                    if member is not None:
+                        await member.add_roles(role)
+                        print(f'Видано роль {role.name} користувачу {member.display_name}')
+
+    # Перевірка і видалення ролей, які не відповідають реакціям на повідомленні
+    for member in message.guild.members:
+        roles_to_remove = [role for role in member.roles if role.id in ROLES.values() and role.name not in [str(reaction.emoji) for reaction in message.reactions]]
+        for role in roles_to_remove:
+            await member.remove_roles(role)
+            print(f'Знято роль {role.name} у користувача {member.display_name}')
+
+@bot.event
+async def on_raw_reaction_add(payload):
+    if payload.message_id == POST_ID:
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, bot.guilds)
+
+        if payload.emoji.name in ROLES:
+            role = discord.utils.get(guild.roles, id=ROLES[payload.emoji.name])
+
+            if role is not None:
+                member = discord.utils.find(lambda m: m.id == payload.user_id, guild.members)
+                if member is not None:
+                    await member.add_roles(role)
+                    print(f'Видано роль {role.name} користувачу {member.display_name}')
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    if payload.message_id == POST_ID:
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, bot.guilds)
+
+        if payload.emoji.name in ROLES:
+            role = discord.utils.get(guild.roles, id=ROLES[payload.emoji.name])
+
+            if role is not None:
+                member = discord.utils.find(lambda m: m.id == payload.user_id, guild.members)
+                if member is not None:
+                    await member.remove_roles(role)
+                    print(f'Знято роль {role.name} у користувача {member.display_name}')
 
 # Створіть список для зберігання даних про сервери та канали
 server_data = [
-    {'server_id': 748275815992656223, 'channel_id': 1159441002935889930},  
+    #{'server_id': 748275815992656223, 'channel_id': 1159441002935889930},  
     {'server_id': 1141311464985083975, 'channel_id': 1158891013931278416},  
-    {'server_id': 1159287478629445643, 'channel_id': 1160166893735387206}, # проблемний сервер
+    #{'server_id': 1159287478629445643, 'channel_id': 1160166893735387206}, # проблемний сервер
     # Додайте налаштування для інших серверів тут
 ]
 
@@ -162,6 +235,10 @@ async def update_roles():
                 if role.name.startswith("Online ") and role.name not in [f"Online {activity}" for activity in playing_activities]:
                     await member.remove_roles(role)
 
+
+@bot.command()
+async def info(ctx):
+    await ctx.send('Я **бот**, який відслідковує активність учасників серверу. В моїх задачах писати інформацію щодо активності учасників, та видавати їм ролі на основі ігор, в які вони на даний момент грають.')
 # Запуск бота
 bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
