@@ -1,6 +1,6 @@
-# Activity BOT by Kroll V3.0
+# Activity BOT by Kroll V4.0
 
-**This bot will be useful to you if you want to display in a text channel messages with the activity of your server's participants, and giving roles in "real time" to server participants who are playing this or that game**<br>
+**This bot will be useful for you if you want to display in a text channel messages with the activity of your server members, issue roles in "real time" to server members playing this or that game or the usual issue of roles through the use of emojis in the message* *<br>
 **Bot functions:**
 
   - Getting information about server members
@@ -11,6 +11,7 @@
   - Automatic creation of roles with game names and "Online" prefix depending on the activity of the participant.
   - Giving to the participant a role with the name of the game that he's currently playing
   - Cleaning the roles of the participant with the name of the game, if he left it
+  - Issuing a role based on the emoji that the participant put on the message
 
 ## FAQ:
 
