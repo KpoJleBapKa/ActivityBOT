@@ -8,19 +8,28 @@ intents.message_content = True
 intents.presences = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='&', intents=intents)
+bot = commands.Bot(command_prefix='&', intents=intents, shutdown_hooks=True)
 
 POST_ID = 1160695186884665374
 
 ROLES = {
     '♀️': 1160695452782575656,
     '♂️': 1160695315368788089,
+    '💅': 1161426283260022815,
     '🎮': 1160695682181636126,
     '⛏️': 1160695772153643169,
     '🔫': 1160695841833631824,
     '♿': 1160695846342512781,
     '🍺': 1160695979658448978,
     '🚗': 1160696027645497375,
+    '🦀': 1163877637131874425,
+    '👹': 1161426426168365127, 
+    '👟': 1161426472104370196,
+    '🎤': 1161426499488976967,
+    '💢': 1161426530925293599,
+    '⚡': 1161426586805997598,
+    '👑': 1161426366542139451,
+    '⚔️': 1161426392962060451,
 }
 
 @bot.event
@@ -236,11 +245,58 @@ async def update_roles():
                     await member.remove_roles(role)
 
 
+# Зміна імені команди !help на !hlp
+@bot.command(name='rules')
+async def help_command(ctx):
+    embed = discord.Embed(
+        title='Список доступних команд:',
+        color=discord.Color.blue()
+    )
+    embed.add_field(name='&rules', value='Навігація по боту', inline=False)
+    embed.add_field(name='&botinfo', value='Інформація про бота', inline=False)
+    embed.add_field(name='&members', value='Відображення списку учасників серверу', inline=False)
+    embed.add_field(name='&clear', value='Очищення повідомлень в текстовому каналі', inline=False)
+    embed.add_field(name='&hello', value='Привітання від бота', inline=False)
+    await ctx.send(embed=embed)
+
+
+
 @bot.command()
-async def info(ctx):
-    await ctx.send('Я **бот**, який відслідковує активність учасників серверу. В моїх задачах писати інформацію щодо активності учасників, та видавати їм ролі на основі ігор, в які вони на даний момент грають.')
+async def botinfo(ctx):
+    embed = discord.Embed(
+        title='Інформація про бота',
+        description='Бот для відслідковування активності учасників серверу.',
+        color=discord.Color.blue()
+    )
+    embed.add_field(name='Автор', value='Kroll', inline=False)
+    embed.add_field(name='Версія бота', value='4.0', inline=False)
+    await ctx.send(embed=embed)
+
+@bot.command()
+async def members(ctx):
+    members = [member.display_name for member in ctx.guild.members]
+    members_list = '\n'.join(members)
+    await ctx.send(f'Список учасників серверу:\n{members_list}')
+
+
+@bot.command()
+async def clear(ctx, amount=5):
+    await ctx.channel.purge(limit=amount + 1)
+    await ctx.send(f'{amount} повідомлень було видалено.', delete_after=5)
+
+
+@bot.command(name='hello')
+async def hello_command(ctx):
+    await ctx.send(f'Привіт, {ctx.author.mention}!')
+
+
+@bot.event
+async def on_shutdown():
+    await bot.close()
+
+bot.add_listener(on_shutdown, "on_shutdown")        
 # Запуск бота
-bot.run('YOUR_TOKEN')  # Замініть на свій токен бота
+bot.run('MTE1ODUyNTMwMDU3ODE5NzU1Ng.GihVl-.MlLpAw6OoSxiP5rpyY0f0PZyOW6xamWMBOT5iM')  # Замініть на свій токен бота
 # token - MTE1ODUyNTMwMDU3ODE5NzU1Ng.GKd1hG.78HVUIG66f9CUuKNra6ZHwaQt4d0J7bUA3wgUY
 # YOUR_TOKEN
 # id каналу - 1158891013931278416 
